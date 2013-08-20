@@ -1,0 +1,47 @@
+{% load i18n %}
+<form id="changelist-search" action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" size="40" name="{{ search_var }}" value="" id="searchbar" />
+    <div class="visual_search" style="margin: 15px;"></div>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            var visualSearch = VS.init({
+                container : $('.visual_search'),
+                query     : '{{ query|safe }}',
+                autosearch: false,
+                callbacks : {
+                    search       : function(query, searchCollection) {
+                        var result = $.map(searchCollection.models, function(val, i) {
+                                                    return [
+                                                            {
+                                                                'key': val.get('category'),
+                                                                'value': val.get('value'),
+                                                                'label': val.get('label'),
+                                                                'object_pk': val.get('object_pk')
+                                                            }
+                                                           ]
+                                                    }
+                                            )
+                        var result = JSON.stringify(result);
+                        $('input[name="{{ search_var }}"]').val(result);
+                        $('#changelist-search').submit();
+                    },
+                    facetMatches : function(callback) {
+                        callback([{% for elm_key, elm_val in keys.items %}{ value: '{{ elm_key }}', label: '{{ elm_val }}' },{% endfor %}]);
+                    },
+                    valueMatches : function(facet, searchTerm, callback) {
+                        $.ajax({
+                            dataType: "json",
+                            url: '{% url "get_matched_items" %}',
+                            data: 'facet='+facet+'&searchTerm='+searchTerm+'&app_label={{ app_label }}&model_name={{ model_name }}',
+                            success: function(data) {
+                                callback(data, {preserveMatches: true});
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+{#    <input type="submit" value="{% trans 'Search' %}">#}
+</form>
