@@ -1,4 +1,3 @@
-import visualsearch
 from setuptools import setup, find_packages
 from setuptools.command.test import test
 
@@ -11,13 +10,15 @@ class TestCommand(test):
 
 setup(
     name='visualsearch',
-    version=visualsearch.__version__,
+    version='1.0',
     description='Visualsearch.js for Django admin',
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     author='Constantin Slednev',
     author_email='c.slednev@gmail.com',
     license='BSD',
     url='https://github.com/ybw/visualsearch',
+    packages=find_packages(),
+    include_package_data=True,
     platforms='any',
     zip_safe=False,
     classifiers=[
