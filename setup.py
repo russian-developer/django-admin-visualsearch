@@ -9,14 +9,14 @@ class TestCommand(test):
 
 
 setup(
-    name='visualsearch',
-    version='1.0',
+    name='django-admin-visualsearch',
+    version='1.2',
     description='Visualsearch.js for Django admin',
     long_description=open('README.md').read(),
     author='Constantin Slednev',
     author_email='c.slednev@gmail.com',
     license='BSD',
-    url='https://github.com/ybw/visualsearch',
+    url='https://github.com/unk2k/django-admin-visualsearch',
     packages=find_packages(),
     include_package_data=True,
     platforms='any',

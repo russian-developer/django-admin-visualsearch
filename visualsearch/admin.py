@@ -2,9 +2,8 @@
 import operator
 from django.core.exceptions import SuspiciousOperation, ImproperlyConfigured
 from django.contrib.admin.options import IncorrectLookupParameters
-from django.contrib.admin.views.main import ChangeList, SEARCH_VAR
+from django.contrib.admin.views.main import ChangeList, SEARCH_VAR, PAGE_VAR
 from django.db import models
-from django.contrib.admin.util import lookup_needs_distinct
 import json
 
 def construct_search(field_name):
@@ -18,6 +17,14 @@ def construct_search(field_name):
         return "%s__icontains" % field_name
 
 class VisualSearchChangeList(ChangeList):
+
+    def __init__(self, request, *a, **k):
+        super(VisualSearchChangeList, self).__init__(request, *a, **k)
+        try:
+            self.page_num = int(request.POST.get(PAGE_VAR, 0))
+        except ValueError:
+            self.page_num = 0
+
     def get_query_set(self, request):
         (self.filter_specs, self.has_filters, remaining_lookup_params,
          use_distinct) = self.get_filters(request)
@@ -62,30 +69,12 @@ class VisualSearchChangeList(ChangeList):
                         field_cls = qs.model._meta.get_field_by_name(field)[0]
                         model = field_cls.related.parent_model
                         model.objects.get(pk=bit['object_pk'])
-                        print 'Find in %s on %s' % (field, bit['object_pk'])
                         and_queries.append(models.Q(**{field: model.objects.get(pk=bit['object_pk'])}))
                     else:
-                        print 'Find in pk on %s' % bit['object_pk']
                         and_queries.append(
                             models.Q(pk=bit['object_pk'])
                         )
             qs = qs.filter(reduce(operator.and_, and_queries))
-            # orm_lookups = [construct_search(str(search_field))
-            #                for search_field in self.search_fields]
-            # for bit in self.query:
-            #     or_queries = [models.Q(**{orm_lookup: bit})
-            #                   for orm_lookup in orm_lookups]
-            #     qs = qs.filter(reduce(operator.or_, or_queries))
-            # if not use_distinct:
-            #     for search_spec in orm_lookups:
-            #         if lookup_needs_distinct(self.lookup_opts, search_spec):
-            #             use_distinct = True
-            #             break
-
-        # if use_distinct:
-        #     return qs.distinct()
-        # else:
-        print unicode(qs.query)
         return qs
 
 

@@ -2,28 +2,33 @@
 <form id="changelist-search" action="" method="post">
     {% csrf_token %}
     <input type="hidden" size="40" name="{{ search_var }}" value="" id="searchbar" />
+    <input type="hidden" name="{{ page_var }}" value="{{ cl.page_num }}" id="page" />
+
     <div class="visual_search" style="margin: 15px;"></div>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
+            function visualsearch_pre_submit(searchCollection) {
+                var result = $.map(searchCollection.models, function(val, i) {
+                            return [
+                                {
+                                    'key': val.get('category'),
+                                    'value': val.get('value'),
+                                    'label': val.get('label'),
+                                    'object_pk': val.get('object_pk')
+                                }
+                            ]
+                        }
+                )
+                result = JSON.stringify(result);
+                $('input[name="{{ search_var }}"]').val(result);
+            }
             var visualSearch = VS.init({
                 container : $('.visual_search'),
                 query     : '{{ query|safe }}',
                 autosearch: false,
                 callbacks : {
                     search       : function(query, searchCollection) {
-                        var result = $.map(searchCollection.models, function(val, i) {
-                                                    return [
-                                                            {
-                                                                'key': val.get('category'),
-                                                                'value': val.get('value'),
-                                                                'label': val.get('label'),
-                                                                'object_pk': val.get('object_pk')
-                                                            }
-                                                           ]
-                                                    }
-                                            )
-                        var result = JSON.stringify(result);
-                        $('input[name="{{ search_var }}"]').val(result);
+                        visualsearch_pre_submit(searchCollection)
                         $('#changelist-search').submit();
                     },
                     facetMatches : function(callback) {
@@ -41,7 +46,12 @@
                     }
                 }
             });
+            $('.paginator > a').click(function(el){
+                visualsearch_pre_submit(visualSearch.searchQuery)
+                $('#page').val(Number(this.text)-1);
+                $('#changelist-search').submit();
+                return false;
+            })
         });
     </script>
-{#    <input type="submit" value="{% trans 'Search' %}">#}
 </form>

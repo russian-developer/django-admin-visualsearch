@@ -1,6 +1,5 @@
-from django.contrib.admin.views.main import SEARCH_VAR
+from django.contrib.admin.views.main import SEARCH_VAR, PAGE_VAR
 from django.template import Library
-from django.utils.safestring import mark_safe
 import json
 
 register = Library()
@@ -14,5 +13,6 @@ def visual_search(cl):
         'app_label': cl.model._meta.app_label,
         'model_name': cl.model.__name__,
         'show_result_count': cl.result_count != cl.full_result_count,
-        'search_var': SEARCH_VAR
+        'search_var': SEARCH_VAR,
+        'page_var': PAGE_VAR
     } 

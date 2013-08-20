@@ -1,0 +1,4 @@
+graft visualsearch
+global-exclude *.pyc
+include README.md
+
